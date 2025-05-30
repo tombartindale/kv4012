@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>KV4012 Marking Form</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="p-4">
+    <div class="container">
+      <h2 class="mb-4">KV4012 Web App Marking Form</h2>
+
+      <form id="inputForm">
+        <i>Paste the code into this box:</i>
+        <textarea id="code" style="width: 100%; min-height: 300px"></textarea>
+      </form>
+      <button class="btn btn-primary">
+        Click here to update marks based on code
+      </button>
+
+      <form id="markingForm">
+        <!-- Criteria Fields -->
+        <div class="mb-3">
+          <label class="form-label">How many code comments were there?</label>
+          <select class="form-select" name="code_comments">
+            <option value="0">None (0 marks)</option>
+            <option value="1">1 - 10 (1 mark)</option>
+            <option value="3">10 - 20 (3 marks)</option>
+            <option value="5">20+ (5 marks)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">How many if statements were used?</label>
+          <select class="form-select" name="if_statements">
+            <option value="0">None (0 marks)</option>
+            <option value="1">1 - 2 (1 mark)</option>
+            <option value="3">3 - 10 (3 marks)</option>
+            <option value="5">10+ (5 marks)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label"
+            >How many Lists/Dictionaries were used?</label
+          >
+          <select class="form-select" name="list/dictionary_use">
+            <option value="0">None (0 marks)</option>
+            <option value="1">1 (1 mark)</option>
+            <option value="3">2 - 10 (3 marks)</option>
+            <option value="5">10+ (5 marks)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">How many variables were used?</label>
+          <select class="form-select" name="variables">
+            <option value="0">None (0 marks)</option>
+            <option value="1">1 - 9 (1 mark)</option>
+            <option value="3">10 - 20 (3 marks)</option>
+            <option value="5">20+ (5 marks)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">How many loops were used?</label>
+          <select class="form-select" name="loop_use">
+            <option value="0">None (0 marks)</option>
+            <option value="1">1 (1 mark)</option>
+            <option value="3">2 - 5 (3 marks)</option>
+            <option value="5">5+ (5 marks)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">How many functions were used?</label>
+          <select class="form-select" name="functions">
+            <option value="0">None (0 marks)</option>
+            <option value="1">1 (1 mark)</option>
+            <option value="3">2 - 10 (3 marks)</option>
+            <option value="5">10+ (5 marks)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">How many classes were used?</label>
+          <select class="form-select" name="classes">
+            <option value="0">None (0 marks)</option>
+            <option value="3">1 - 2 (3 marks)</option>
+            <option value="5">3+ (5 marks)</option>
+          </select>
+        </div>
+
+        <!-- Submit Button -->
+      </form>
+      <button type="button" class="btn btn-primary" onclick="calculateMark()">
+        Calculate Mark
+      </button>
+      <button class="btn btn-secondary" onclick="copyFeedback()">
+        Copy Feedback to Clipboard
+      </button>
+
+      <!-- Results -->
+      <div class="mt-4">
+        <h4>Total Mark: <span id="totalMark">0</span>/35</h4>
+        <h5>Feedback:</h5>
+        <p id="feedbackText"></p>
+      </div>
+    </div>
+
+    <script>
+      function testMe(test, code) {
+        const array = [...code.matchAll(test)];
+        // console.log(array);
+        return array.length;
+      }
+
+      function setVal(select, val) {
+        select.value = val;
+      }
+
+      const selectElement = document.getElementById("code");
+      // const result = document.querySelector(".result");
+
+      selectElement.addEventListener("change", (event) => {
+        // console.log(event.target.value);
+        //test for all things:
+        comments = testMe(/\s*#.*|^\s*""".*/gm, event.target.value);
+        console.log(comments, "Code comments");
+
+        if (comments == 0) comments = 0;
+        else if (comments <= 10) comments = 1;
+        else if (comments <= 20) comments = 3;
+        else comments = 5;
+        setVal(
+          document.querySelector("select[name='code_comments']"),
+          comments
+        );
+
+        ifs = testMe(/^\s*if .*:/gm, event.target.value);
+        console.log(ifs, "If statements");
+        if (ifs == 0) ifs = 0;
+        else if (ifs <= 2) ifs = 1;
+        else if (ifs <= 10) ifs = 3;
+        else ifs = 5;
+        setVal(document.querySelector("select[name='if_statements']"), ifs);
+
+        lists = testMe(
+          /^\s*\w* ?= ?{.*}|^\s*\w* ?= ?\[(.|\s)*?\]/gm,
+          event.target.value
+        );
+        console.log(lists, "Lists/Dictionaries");
+        if (lists == 0) lists = 0;
+        else if (lists == 1) lists = 1;
+        else if (lists <= 10) lists = 3;
+        else lists = 5;
+        setVal(
+          document.querySelector("select[name='list/dictionary_use']"),
+          lists
+        );
+
+        variables = testMe(/^\s*\w* ?= ?.*/gm, event.target.value);
+
+        console.log(variables, "Variables");
+        if (variables == 0) variables = 0;
+        else if (variables <= 9) variables = 1;
+        else if (variables <= 20) variables = 3;
+        else variables = 5;
+        setVal(document.querySelector("select[name='variables']"), variables);
+
+        loops = testMe(/^\s*for .*:|^\s*while .*:/gm, event.target.value);
+        console.log(loops, "Loops");
+        if (loops == 0) loops = 0;
+        else if (loops == 1) loops = 1;
+        else if (loops <= 5) loops = 3;
+        else loops = 5;
+        setVal(document.querySelector("select[name='loop_use']"), loops);
+
+        functions =
+          testMe(/^\s*def .*/gm, event.target.value) -
+          testMe(/^\s*def __.*/gm, event.target.value);
+        console.log(functions, "Functions");
+        if (functions == 0) functions = 0;
+        else if (functions == 1) functions = 1;
+        else if (functions <= 10) functions = 3;
+        else functions = 5;
+        setVal(document.querySelector("select[name='functions']"), functions);
+
+        classes = testMe(/^\s*class .*/gm, event.target.value);
+        console.log(classes, "Classes");
+        if (classes == 0) classes = 0;
+        else if (classes <= 2) classes = 3;
+        else classes = 5;
+        setVal(document.querySelector("select[name='classes']"), classes);
+      });
+
+      function calculateMark() {
+        const form = document.getElementById("markingForm");
+        const formData = new FormData(form);
+        let total = 0;
+        let feedback = [];
+        const specificFeedback = new Map([
+          [
+            "code_comments",
+            [
+              "There is excellent use of code comments throughout, helping to make your code more readable.",
+              "Good to see some use of code comments.",
+              "You could make better use of code comments, poor commenting impacts readability and maintainability.",
+              "Code commenting is missing, you should consider adding comments to help make your code more readable.",
+            ],
+          ],
+          [
+            "if_statements",
+            [
+              "Excellent use of if statements throughout.",
+              "There is an expected use of if statements to control the flow of your program.",
+              "There is only a very basic use of if statements used here to control your program.",
+              "If statements are missing, you should be incorporating these basic structures to demonstrate your knowledge of programming.",
+            ],
+          ],
+          [
+            "list/dictionary_use",
+            [
+              "Judicious use of list/dictionary collections shows your confidence with these sophisticated objects.",
+              "There is some good use of lists/dictionaries which is good to see.",
+              "Basic use of lists/dictionaries suggests you could give further thought to how these objects can help you store and process collects of data.",
+              "There are no lists/dictionaries in your code suggesting that you may wish to revise the use of these important coding elements.",
+            ],
+          ],
+          [
+            "variables",
+            [
+              "Your code demonstrates an advanced use of a variety of variables with sensible names.",
+              "Your code evidences an expected use of a number of variables which is good.",
+              "Your code demonstrates a basic use of variables, however you might wish to expand this in future to further develop and demonstrate your coding skills.",
+              "No variables have been used which is an important omission from a project of this complexity. An understanding of the basics of variable use is vital to programming.",
+            ],
+          ],
+          [
+            "loop_use",
+            [
+              "The excellent use of loops shows an advanced approach to your algorithmic thinking.",
+              "There is good use of loops demonstrating your confidence with these important structures.",
+              "Using more loops would help to demonstrate your developing coding prowess.",
+              "No loops have been used at all, suggesting a lack of confidence or gap in your knowledge regarding these important structures. It may be helpful to revisit the syntax and use of loops in the module materials.",
+            ],
+          ],
+          [
+            "functions",
+            [
+              "An excellent use of functions is demonstrated, well done.",
+              "An expected range of functions have been used to help make your code more modular which is good.",
+              "A basic use of functions is present, you should consider examining your code for repeated patterns that would benefit from being capture in a function.",
+              "There are no functions in your code which is a shame as these help to cut down repetition, save you time and make your code more modular and readable. Consider revising this important topic and having more practice with them.",
+            ],
+          ],
+          [
+            "classes",
+            [
+              "It is excellent to see a good use of classes in your code, very nicely done.",
+              "Great to see you giving classes a try in your code, consider expanding the application of these in future.",
+              "Great to see you giving classes a try in your code, consider expanding the application of these in future.",
+              "No classes have been used in your code, it would have been better to see you giving these a try, even if just to model something basic like the User.",
+            ],
+          ],
+        ]);
+
+        for (let [key, value] of formData.entries()) {
+          let val = parseInt(value);
+          total += val;
+          if (val === 5) {
+            feedback.push(
+              `${
+                key.charAt(0).toUpperCase() +
+                key.slice(1).replace("_", " ") +
+                ": " +
+                specificFeedback.get(key)[0]
+              }`
+            );
+          } else if (val === 3) {
+            feedback.push(
+              `${
+                key.charAt(0).toUpperCase() +
+                key.slice(1).replace("_", " ") +
+                ": " +
+                specificFeedback.get(key)[1]
+              }`
+            );
+          } else if (val === 1) {
+            feedback.push(
+              `${
+                key.charAt(0).toUpperCase() +
+                key.slice(1).replace("_", " ") +
+                ": " +
+                specificFeedback.get(key)[2]
+              }`
+            );
+          } else {
+            feedback.push(
+              `${
+                key.charAt(0).toUpperCase() +
+                key.slice(1).replace("_", " ") +
+                ": " +
+                specificFeedback.get(key)[3]
+              }`
+            );
+          }
+          feedback.push("\n");
+        }
+        feedback.push(" Overall:");
+        if (total > 29) {
+          feedback.push(
+            " You demonstrate an excellent understanding of programming concepts and python syntax. Excellent work. "
+          );
+        } else if (total > 19) {
+          feedback.push(
+            " Your code evidences a good level of competency and understanding of python and programming. Good work."
+          );
+        } else if (total > 9) {
+          feedback.push(
+            " Good attempt, however using a broader range of coding structures throughout your code would better demonstrate your learning and engagement with the module."
+          );
+        } else {
+          feedback.push(
+            " It would be beneficial to revisit the module materials and to revise and practice your use of python and the various concepts taught throughout the course."
+          );
+        }
+
+        document.getElementById("totalMark").innerText = total;
+        document.getElementById("feedbackText").innerText = feedback.join(" ");
+      }
+
+      function copyFeedback() {
+        const feedback = document.getElementById("feedbackText").innerText;
+        navigator.clipboard
+          .writeText(feedback)
+          .then(() => {})
+          .catch((err) => {
+            alert("Failed to copy feedback.");
+            console.error(err);
+          });
+      }
+    </script>
+  </body>
+</html>
